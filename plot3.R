@@ -1,0 +1,62 @@
+## Read File from the current working directory 
+hpowcols <- read.table("household_power_consumption.txt",
+                       header=T,
+                       sep=';',
+                       as.is=TRUE,
+                       nrows=5,
+                       na.string="?")
+## Get the Col classes to save the read time 
+gocls <- sapply(names(hpowcols),
+                function(y) 
+                { 
+                  class(hpowcols[[y]])
+                }
+)
+
+hhpowcons <- read.table("household_power_consumption.txt",
+                        header=T,sep=';',
+                        as.is=TRUE,
+                        na.string="?",
+                        colClasses=gocls
+)
+## Filter the data for dates "2007-02-01" & "2007-02-02"
+hhsubset <- subset(hhpowcons,
+                   as.Date(Date,format='%d/%m/%Y') %in% as.Date(c("2007-02-01","2007-02-02"))
+)
+## Format the Date column from data frame hhsubset and add new column aDay with Day 
+hhsubset <- data.frame(hhsubset,
+                       aDay=format(as.Date(hhsubset$Date,'%d/%m/%Y'),"%a")
+                      )
+png(file="plot3.png") ## Open the PNG File Device
+
+with(hhsubset,                ## Line plot for Sub_metering_1 againest date time
+      plot(Sub_metering_1,
+          ylab="Energy sub metering",
+          type="l",
+          axes=FALSE,
+          xlab=""
+     )
+)
+with(hhsubset,               ## add Sub_metering_2 line for existing plot
+      lines(Sub_metering_2,
+          type="l",
+          col="red"
+     )
+)
+with(hhsubset,
+     lines(Sub_metering_3, ## add Sub_metering_3 line for existing plot
+          type="l",
+          col="blue"
+     )
+) 
+axis(1,c(0,1441,2881),c("Thu","Fri","Sat")) ## add x axix labeles at specified ticks
+axis(2,seq(0,30,10))                        ## add y axix with specified range
+legend("topright",                          ## Add Legend to the plot at topright corner 
+       lwd=1,
+       col=c("black","red","blue"),
+       legend=c("Sub_metering_1","Sub_metering_2","Sub_metering_3")
+      )
+
+box() ## Draw BOX around the Plot
+
+dev.off() ## shutdown the open device
